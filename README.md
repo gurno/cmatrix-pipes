@@ -29,6 +29,7 @@
     - [Using configure (recommended)](#using-configure-(recommended-for-most-linux%2Fmingw-users))
     - [Using CMake](#using-cmake)
 - [Usage](#usage)
+    - [Named Pipe Control](#named-pipe-control)
 - [Captures](#captures)
     - [Screenshots](#screenshots)
     - [Screencasts](#screencasts)
@@ -54,15 +55,29 @@ any of its affiliates in any way, just fans.
 ![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
 ## :open_file_folder: Build Dependencies
-You'll probably need a decent ncurses library to get this to work. On Windows, using mingw-w64-ncurses is recommended (PDCurses will also work, but it does not support colors or bold text).
-<br>
+You'll need the following libraries to build cmatrix:
+
+1. **ncurses library** - For terminal manipulation. On Windows, using mingw-w64-ncurses is recommended (PDCurses will also work, but it does not support colors or bold text).
+
+2. **pthread library** - For named pipe support.
+
 ##### :small_blue_diamond: For Linux<br>
-Run this command to check the version of ncurses.
+Run these commands to check if you have the required libraries:
 ```
 ldconfig -p | grep ncurses
+ldconfig -p | grep pthread
 ```
-If you get no output then you need to install ncurses. Click below to install ncurses in Linux.
+If you get no output for ncurses, you need to install it. Click below for installation instructions:
 - [ncurses](https://www.cyberciti.biz/faq/linux-install-ncurses-library-headers-on-debian-ubuntu-centos-fedora/)
+
+Most Linux distributions include pthread by default. If missing, you can install it with your package manager:
+```
+# For Debian/Ubuntu
+sudo apt-get install libpthread-stubs0-dev
+
+# For Fedora/CentOS
+sudo dnf install glibc-devel
+```
 
 ![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
@@ -102,7 +117,7 @@ cmatrix
 ```
 Run with different arguments to get different effects.
 ```sh
-cmatrix [-abBflohnsmVx] [-u update] [-C color]
+cmatrix [-abBflohnsmVx] [-u update] [-C color] [-P pipe_path]
 ```
 Example:
 ```sh
@@ -113,6 +128,29 @@ For more options and **help** run `cmatrix -h` <br>OR<br> Read Manual Page by ru
 
 _To get the program to look most like the movie, use `cmatrix -lba`_
 _To get the program to look most like the Win/Mac screensaver, use `cmatrix -ol`_
+
+### Named Pipe Control
+
+CMatrix supports runtime control through a named pipe with the `-P` option:
+
+```sh
+cmatrix -P /tmp/cmatrix_pipe
+```
+
+This creates a named pipe at the specified path. You can control the animation while it's running by sending commands to this pipe from another terminal or script:
+
+```sh
+# Change color to red
+echo "color=red" > /tmp/cmatrix_pipe
+
+# Change to rainbow mode
+echo "color=rainbow" > /tmp/cmatrix_pipe
+
+# Change speed (0-10, lower is faster)
+echo "speed=2" > /tmp/cmatrix_pipe
+```
+
+Available color options: green, red, blue, white, yellow, cyan, magenta, black, rainbow
 
 > :round_pushpin: _Note: cmatrix is probably not particularly portable or efficient, but it won't hog
 **too** much CPU time._
