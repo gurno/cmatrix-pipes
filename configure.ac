@@ -23,6 +23,10 @@ dnl Checks for libraries.
 dnl Replace `main' with a function in -lncurses:
 AC_CHECK_LIB(ncurses, main)
 
+dnl Check for pthread support
+AC_CHECK_LIB(pthread, pthread_create)
+AC_CHECK_HEADERS(pthread.h)
+
 dnl Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS(fcntl.h sys/ioctl.h unistd.h termios.h termio.h getopt.h)

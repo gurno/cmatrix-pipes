@@ -66,7 +66,8 @@ endif()
 
 add_executable(cmatrix cmatrix.c)
 
-target_link_libraries(cmatrix ${CURSES_LIBRARIES})
+find_package(Threads REQUIRED)
+target_link_libraries(cmatrix ${CURSES_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 install(TARGETS cmatrix DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES cmatrix.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
