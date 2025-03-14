@@ -17,20 +17,20 @@
 ![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
 ## Contents
-- [Overview](#overview)
-- [Build Dependencies](#build-dependencies)
-- [Building and Installation](#building-and-installing-cmatrix-pipes)
-    - [Using configure (recommended)](#using-configure-(recommended-for-most-linux%2Fmingw-users))
-    - [Using CMake](#using-cmake)
-- [Usage](#usage)
+- [Overview](#cloud-overview)
+- [Build Dependencies](#open_file_folder-build-dependencies)
+- [Building and Installation](#floppy_disk-building-and-installing-cmatrix-pipes)
+    - [Using configure](#small_blue_diamond-using-configure-recommended-for-most-linuxmingw-users)
+    - [Using CMake](#small_blue_diamond-using-cmake)
+- [Usage](#bookmark_tabs-usage)
     - [Named Pipe Control](#named-pipe-control)
-- [Captures](#captures)
-    - [Screenshots](#screenshots)
-    - [Screencasts](#screencasts)
-- [Original Project](#original-project)
-- [Contributors](#our-contributors)
-- [Contribution Guide](#contribution-guide)
-- [License](#license)
+- [Captures](#camera-captures)
+    - [Screenshots](#small_blue_diamond-screenshots)
+    - [Screencasts](#small_blue_diamond-screencasts)
+- [Original Project](#link-original-project)
+- [Contributors](#busts_in_silhouette-our-contributors)
+- [Contribution Guide](#book-contribution-guide)
+- [License](#page_facing_up-license)
 
 ![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
@@ -77,7 +77,7 @@ sudo dnf install glibc-devel
 ## :floppy_disk: Building and installing CMatrix-Pipes
 To install cmatrix-pipes, clone this repo in your local system and use either of the following methods from within the cmatrix-pipes directory.
 
-#### :small_blue_diamond: Using `configure` (recommended for most linux/mingw users)
+#### :small_blue_diamond: Using configure (recommended for most linux/mingw users)
 ```sh
 autoreconf -i  # skip if using released tarball
 ./configure
