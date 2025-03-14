@@ -173,24 +173,24 @@ CMatrix-Pipes is a fork of [CMatrix](https://github.com/abishekvashok/cmatrix), 
 
 ## :busts_in_silhouette: Our Contributors
 #### :small_orange_diamond: Thanks to
-- ➤ **Chris Allegretta** <chrisa@asty.org> for writing cmatrix up in a fortnight and giving us
+- **Chris Allegretta** <chrisa@asty.org> for writing cmatrix up in a fortnight and giving us
   the responsibility to further improve it.
-- ➤ **Abishek V Ashok** [Core] - <abishekvashok@gmail.com> for maintaining the original CMatrix project.
-- ➤ **Krisjon Hanson** and **Bjoern Ganslandt** for helping with bold support and
+- **Abishek V Ashok** [Core] - <abishekvashok@gmail.com> for maintaining the original CMatrix project.
+- **Krisjon Hanson** and **Bjoern Ganslandt** for helping with bold support and
   Bjoern again for the cursor removal code, helping with the `-u` and `-l`
   modes/flags, and Makefile improvements.
-- ➤ **Garrick West** for debian consolefont dir support.
-- ➤ **Nemo** for design thoughts and continuous help and support.
-- ➤ **John Donahue** for helping with transparent term support
-- ➤ **Ben Esacove** for Redhat 6 compatibility w/matrix.psf.gz
-- ➤ **jwz** for the xmatrix module to xscreensaver at http://www.jwz.org/xscreensaver.
+- **Garrick West** for debian consolefont dir support.
+- **Nemo** for design thoughts and continuous help and support.
+- **John Donahue** for helping with transparent term support
+- **Ben Esacove** for Redhat 6 compatibility w/matrix.psf.gz
+- **jwz** for the xmatrix module to xscreensaver at http://www.jwz.org/xscreensaver.
 - Chris Allegretta's girlfriend **Amy** for not killing him when he stayed up till 3 AM
   writing code.
-- ➤ **Sumit Kumar Soni** for beautifying the README.
+- **Sumit Kumar Soni** for beautifying the README.
 - The makers of the Matrix for one kickass movie!
-- ➤ Everyone who has sent (and who will send) us and Chris mails regarding
+- Everyone who has sent (and who will send) us and Chris mails regarding
   bugs, comments, patches or just a simple hello.
-- ➤ Everyone who has contributed to the project by opening issues and PRs on the github repository.
+- Everyone who has contributed to the project by opening issues and PRs on the github repository.
 
 ![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
