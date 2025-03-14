@@ -71,6 +71,14 @@
 #include <termio.h>
 #endif
 
+/* For named pipes */
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <poll.h>
+#include <pthread.h>
+
+#define PIPE_BUF_SIZE 256
+
 #ifdef __CYGWIN__
 #define TIOCSTI 0x5412
 #endif
@@ -93,6 +101,13 @@ int *updates = NULL; /* What does this do again? */
 volatile sig_atomic_t signal_status = 0; /* Indicates a caught signal */
 #endif
 
+/* Global variables for pipe control */
+char *pipe_path = NULL;      /* Path to the named pipe */
+int pipe_fd = -1;            /* File descriptor for the pipe */
+pthread_t pipe_thread;       /* Thread for reading from pipe */
+int use_pipe = 0;            /* Flag for pipe usage */
+pthread_mutex_t pipe_mutex = PTHREAD_MUTEX_INITIALIZER; /* Mutex for shared resources */
+
 int va_system(char *str, ...) {
 
     va_list ap;
@@ -105,6 +120,20 @@ int va_system(char *str, ...) {
 }
 
 /* What we do when we're all set to exit */
+/* Clean up pipe resources */
+void cleanup_pipe(void) {
+    if (pipe_fd >= 0) {
+        close(pipe_fd);
+        pipe_fd = -1;
+    }
+    
+    if (pipe_path) {
+        unlink(pipe_path);
+        free(pipe_path);
+        pipe_path = NULL;
+    }
+}
+
 void finish(void) {
     curs_set(1);
     clear();
@@ -118,6 +147,14 @@ void finish(void) {
         va_system("setfont");
 #endif
     }
+    
+    /* Clean up pipe if used */
+    if (use_pipe) {
+        pthread_cancel(pipe_thread);
+        pthread_join(pipe_thread, NULL);
+        cleanup_pipe();
+    }
+    
     exit(0);
 }
 
@@ -139,6 +176,13 @@ void c_die(char *msg, ...) {
         va_system("setfont");
 #endif
     }
+    
+    /* Clean up pipe if used */
+    if (use_pipe) {
+        pthread_cancel(pipe_thread);
+        pthread_join(pipe_thread, NULL);
+        cleanup_pipe();
+    }
 
     va_start(ap, msg);
     vfprintf(stderr, msg, ap);
@@ -146,8 +190,159 @@ void c_die(char *msg, ...) {
     exit(0);
 }
 
+/* Forward declarations of global variables */
+extern int mcolor;
+extern int rainbow;
+extern int update;
+
+/* Process pipe commands */
+void process_pipe_command(char *cmd) {
+    if (!cmd || strlen(cmd) == 0) 
+        return;
+    
+    /* Trim newline character if present */
+    size_t len = strlen(cmd);
+    if (cmd[len-1] == '\n')
+        cmd[len-1] = '\0';
+        
+    /* Parse command with format: command=value */
+    char *value = strchr(cmd, '=');
+    if (!value) {
+        fprintf(stderr, "Invalid command format: %s\n", cmd);
+        return;
+    }
+    
+    *value = '\0'; /* Split string at = */
+    value++;       /* Move to value part */
+    
+    pthread_mutex_lock(&pipe_mutex);
+    
+    /* Handle color command */
+    if (strcmp(cmd, "color") == 0) {
+        if (strcmp(value, "green") == 0) {
+            mcolor = COLOR_GREEN;
+            rainbow = 0;
+        } else if (strcmp(value, "red") == 0) {
+            mcolor = COLOR_RED;
+            rainbow = 0;
+        } else if (strcmp(value, "blue") == 0) {
+            mcolor = COLOR_BLUE;
+            rainbow = 0;
+        } else if (strcmp(value, "white") == 0) {
+            mcolor = COLOR_WHITE;
+            rainbow = 0;
+        } else if (strcmp(value, "yellow") == 0) {
+            mcolor = COLOR_YELLOW;
+            rainbow = 0;
+        } else if (strcmp(value, "cyan") == 0) {
+            mcolor = COLOR_CYAN;
+            rainbow = 0;
+        } else if (strcmp(value, "magenta") == 0) {
+            mcolor = COLOR_MAGENTA;
+            rainbow = 0;
+        } else if (strcmp(value, "black") == 0) {
+            mcolor = COLOR_BLACK;
+            rainbow = 0;
+        } else if (strcmp(value, "rainbow") == 0) {
+            rainbow = 1;
+        }
+    }
+    /* Handle speed command */
+    else if (strcmp(cmd, "speed") == 0) {
+        int speed = atoi(value);
+        if (speed >= 0 && speed <= 10) {
+            update = speed;
+        }
+    }
+    
+    pthread_mutex_unlock(&pipe_mutex);
+}
+
+/* Thread function to monitor pipe */
+void *pipe_monitor_thread(void *arg) {
+    char buffer[PIPE_BUF_SIZE];
+    struct pollfd pfd;
+    int ret;
+    
+    /* Set up polling structure */
+    pfd.fd = pipe_fd;
+    pfd.events = POLLIN;
+    
+    while (1) {
+        /* Wait for data with a timeout */
+        ret = poll(&pfd, 1, 1000); /* 1 second timeout */
+        
+        if (ret < 0) {
+            /* Error occurred */
+            if (errno != EINTR) {
+                perror("poll");
+                break;
+            }
+        } else if (ret > 0) {
+            /* Data is available */
+            if (pfd.revents & POLLIN) {
+                ssize_t bytes_read = read(pipe_fd, buffer, PIPE_BUF_SIZE - 1);
+                if (bytes_read > 0) {
+                    buffer[bytes_read] = '\0';
+                    process_pipe_command(buffer);
+                } else if (bytes_read == 0) {
+                    /* Pipe closed, reopen it */
+                    close(pipe_fd);
+                    pipe_fd = open(pipe_path, O_RDONLY | O_NONBLOCK);
+                    if (pipe_fd < 0) {
+                        perror("Failed to reopen pipe");
+                        break;
+                    }
+                    pfd.fd = pipe_fd;
+                } else {
+                    /* Read error */
+                    if (errno != EAGAIN && errno != EWOULDBLOCK) {
+                        perror("read");
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    
+    return NULL;
+}
+
+/* Create and initialize named pipe */
+int setup_pipe(const char *path) {
+    /* Create the pipe if it doesn't exist */
+    if (mkfifo(path, 0666) < 0 && errno != EEXIST) {
+        perror("mkfifo");
+        return 0;
+    }
+    
+    /* Open the pipe for reading, non-blocking */
+    pipe_fd = open(path, O_RDONLY | O_NONBLOCK);
+    if (pipe_fd < 0) {
+        perror("open pipe");
+        unlink(path);
+        return 0;
+    }
+    
+    /* Start the monitoring thread */
+    if (pthread_create(&pipe_thread, NULL, pipe_monitor_thread, NULL) != 0) {
+        perror("pthread_create");
+        close(pipe_fd);
+        unlink(path);
+        return 0;
+    }
+    
+    pipe_path = strdup(path);
+    fprintf(stderr, "Named pipe created at: %s\n", path);
+    fprintf(stderr, "Send commands with: echo \"command=value\" > %s\n", path);
+    fprintf(stderr, "Commands: color=green|red|blue|white|yellow|cyan|magenta|black|rainbow\n");
+    fprintf(stderr, "          speed=0-10\n");
+    
+    return 1;
+}
+
 void usage(void) {
-    printf(" Usage: cmatrix -[abBcfhlsmVxk] [-u delay] [-C color] [-t tty] [-M message]\n");
+    printf(" Usage: cmatrix -[abBcfhlsmVxk] [-u delay] [-C color] [-t tty] [-M message] [-P pipe_path]\n");
     printf(" -a: Asynchronous scroll\n");
     printf(" -b: Bold characters on\n");
     printf(" -B: All bold characters (overrides -b)\n");
@@ -168,6 +363,7 @@ void usage(void) {
     printf(" -m: lambda mode\n");
     printf(" -k: Characters change while scrolling. (Works without -o opt.)\n");
     printf(" -t [tty]: Set tty to use\n");
+    printf(" -P [pipe_path]: Create a named pipe for runtime control of color and speed\n");
 }
 
 void version(void) {
@@ -310,6 +506,11 @@ void resize_screen(void) {
     refresh();
 }
 
+/* Shared variables used by pipe control */
+int update = 4;
+int mcolor = COLOR_GREEN;
+int rainbow = 0;
+
 int main(int argc, char *argv[]) {
     int i, y, z, optchr, keypress;
     int j = 0;
@@ -321,10 +522,7 @@ int main(int argc, char *argv[]) {
     int firstcoldone = 0;
     int oldstyle = 0;
     int random = 0;
-    int update = 4;
     int highnum = 0;
-    int mcolor = COLOR_GREEN;
-    int rainbow = 0;
     int lambda = 0;
     int randnum = 0;
     int randmin = 0;
@@ -339,7 +537,7 @@ int main(int argc, char *argv[]) {
 
     /* Many thanks to morph- (morph@jmss.com) for this getopt patch */
     opterr = 0;
-    while ((optchr = getopt(argc, argv, "abBcfhlLnrosmxkVM:u:C:t:")) != EOF) {
+    while ((optchr = getopt(argc, argv, "abBcfhlLnrosmxkVM:u:C:t:P:")) != EOF) {
         switch (optchr) {
         case 's':
             screensaver = 1;
@@ -427,6 +625,12 @@ int main(int argc, char *argv[]) {
             break;
         case 't':
             tty = optarg;
+            break;
+        case 'P':
+            use_pipe = 1;
+            if (!setup_pipe(optarg)) {
+                c_die("Failed to set up pipe at %s\n", optarg);
+            }
             break;
         }
     }
@@ -887,6 +1091,8 @@ if (console) {
             for (i = 0; i < strlen(msg)+4; i++)
                 addch(' ');
         }
+
+        /* Sleep according to update speed */
 
         napms(update * 10);
     }

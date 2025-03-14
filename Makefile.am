@@ -1,5 +1,5 @@
-bin_PROGRAMS = cmatrix
-cmatrix_SOURCES = cmatrix.c
+bin_PROGRAMS = cmatrix-pipes
+cmatrix_pipes_SOURCES = cmatrix.c
 
 man_MANS = cmatrix.1
 
@@ -32,7 +32,7 @@ install-data-local:
 	    		$(MKFONTDIR) $(DESTDIR)/usr/share/fonts/misc; \
 	    		$(INSTALL_DATA) $(srcdir)/mtx.pcf $(DESTDIR)/usr/share/fonts/misc; \
 	    		$(INSTALL_DATA) $(srcdir)/mtx.pcf $(DESTDIR)/usr/share/fonts/misc; \
-	    		echo " Done.  If this is the first time you have installed CMatrix you will"; \
+	    		echo " Done.  If this is the first time you have installed CMatrix-Pipes you will"; \
 	    		echo " probably have to restart X window in order to use the mtx.pcf font."; \
 		elif test -d /usr/share/X11/fonts/misc; then \
 	    		echo " Installing X window matrix fonts in /usr/share/X11/fonts/misc..."; \
@@ -40,7 +40,7 @@ install-data-local:
 	    		$(MKFONTDIR) $(DESTDIR)/usr/share/X11/fonts/misc; \
 	    		$(INSTALL_DATA) $(srcdir)/mtx.pcf $(DESTDIR)/usr/share/X11/fonts/misc; \
 	    		$(INSTALL_DATA) $(srcdir)/mtx.pcf $(DESTDIR)/usr/share/X11/fonts/misc; \
-	    		echo " Done.  If this is the first time you have installed CMatrix you will"; \
+	    		echo " Done.  If this is the first time you have installed CMatrix-Pipes you will"; \
 	    		echo " probably have to restart X window in order to use the mtx.pcf font."; \
 		else \
 			if test -d /usr/X11R6/lib/X11/fonts/misc; then \
@@ -49,7 +49,7 @@ install-data-local:
 	    			$(MKFONTDIR) $(DESTDIR)/usr/X11R6/lib/X11/fonts/misc; \
 	    			$(INSTALL_DATA) $(srcdir)/mtx.pcf $(DESTDIR)/usr/X11R6/lib/X11/fonts/misc; \
 	    			$(INSTALL_DATA) $(srcdir)/mtx.pcf $(DESTDIR)/usr/X11R6/lib/X11/fonts/misc; \
-	    			echo " Done.  If this is the first time you have installed CMatrix you will"; \
+	    			echo " Done.  If this is the first time you have installed CMatrix-Pipes you will"; \
 	    			echo " probably have to restart X window in order to use the mtx.pcf font."; \
 			fi \
 		fi; \

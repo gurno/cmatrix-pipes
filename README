@@ -1,2 +1,4 @@
-Dummy file.
-Please see: https://github.com/abishekvashok/cmatrix
+Please see: https://github.com/gurno/cmatrix-pipes
+
+This is a fork of the original CMatrix (https://github.com/abishekvashok/cmatrix) 
+with added support for runtime control through named pipes.
