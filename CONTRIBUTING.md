@@ -1,4 +1,12 @@
-# Contributing
+# Contributing to CMatrix-Pipes
+
+CMatrix-Pipes is a fork of the original [CMatrix](https://github.com/abishekvashok/cmatrix) project with a specific focus on named pipe control functionality. This focus guides our contribution process.
+
+## Contribution Scope
+
+- **Named Pipe Features**: This repository is primarily for contributions related to the named pipe control interface and its functionality.
+- **Core CMatrix Features**: For bug fixes, improvements, or features related to the core CMatrix functionality (not related to pipes), please submit them to the [original CMatrix project](https://github.com/abishekvashok/cmatrix) instead.
+- **Merging Changes**: We regularly merge changes from the upstream CMatrix project to keep the codebase up to date.
 
 When contributing to this repository, please first discuss the change you wish to make via issue,
 email, or any other method with the owners of this repository before making a change.
@@ -73,8 +81,7 @@ further defined and clarified by project maintainers.
 ### Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported by contacting the current maintainer at abishekvashok at the rate
-mail dot com. All
+reported by contacting the project maintainers through the GitHub issue tracker. All
 complaints will be reviewed and investigated and will result in a response that
 is deemed necessary and appropriate to the circumstances. The project team is
 obligated to maintain confidentiality with regard to the reporter of an incident.
