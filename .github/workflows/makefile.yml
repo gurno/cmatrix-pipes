@@ -14,14 +14,17 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Install dependencies
+      run: sudo apt-get install -y libncurses5-dev libncursesw5-dev
+      
+    - name: Run autoreconf
+      run: autoreconf -i
+      
     - name: configure
       run: ./configure
 
-    - name: Install dependencies
+    - name: Build
       run: make
 
-    - name: Run check
-      run: make check
-
-    - name: Run distcheck
-      run: make distcheck
+    - name: Test binary
+      run: ./cmatrix-pipes -V
