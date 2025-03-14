@@ -1051,7 +1051,16 @@ if (console) {
                             wchar_t char_array[2];
                             char_array[0] = matrix[i][j].val;
                             char_array[1] = 0;
+                            /* Use add_wch when addwstr is unavailable */
+                            #ifdef HAVE_NCURSESW_H
                             addwstr(char_array);
+                            #else
+                            {
+                                char buffer[MB_CUR_MAX + 1];
+                                wcstombs(buffer, char_array, MB_CUR_MAX);
+                                addstr(buffer);
+                            }
+                            #endif
                         }
                         if (bold == 2 ||
                             (bold == 1 && matrix[i][j].val % 2 == 0)) {
