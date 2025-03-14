@@ -149,9 +149,31 @@ echo "color=rainbow" > /tmp/cmatrix_pipe
 
 # Change speed (0-10, lower is faster)
 echo "speed=2" > /tmp/cmatrix_pipe
+
+# Pause the animation
+echo "pause=on" > /tmp/cmatrix_pipe
+
+# Resume the animation
+echo "pause=off" > /tmp/cmatrix_pipe
+
+# Change bold style
+echo "bold=all" > /tmp/cmatrix_pipe
+
+# Exit cmatrix-pipes (doesn't work in lock mode)
+echo "exit=force" > /tmp/cmatrix_pipe
 ```
 
-Available color options: green, red, blue, white, yellow, cyan, magenta, black, rainbow
+#### Available Pipe Commands:
+
+Command | Description | Examples
+--------|-------------|--------
+`color=VALUE` | Change matrix color or enable rainbow mode | `color=green`<br>`color=red`<br>`color=blue`<br>`color=white`<br>`color=yellow`<br>`color=cyan`<br>`color=magenta`<br>`color=black`<br>`color=rainbow`
+`speed=VALUE` | Set animation speed (0-10, where 0 is fastest) | `speed=0`<br>`speed=5`<br>`speed=10`
+`pause=VALUE` | Pause or resume animation | `pause=on`<br>`pause=off`<br>`pause=1`<br>`pause=0`<br>`pause=true`<br>`pause=false`
+`bold=VALUE` | Control character boldness | `bold=on`<br>`bold=off`<br>`bold=all`<br>`bold=0`<br>`bold=1`<br>`bold=2`
+`exit=VALUE` | Exit CMatrix (won't work in lock mode) | `exit=force`<br>`exit=1`<br>`exit=true`
+
+The pipe interface includes automatic recovery from disconnections and errors, making it suitable for integration with other applications or scripts.
 
 > :round_pushpin: _Note: cmatrix-pipes is probably not particularly portable or efficient, but it won't hog
 **too** much CPU time._
