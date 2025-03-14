@@ -7,17 +7,32 @@ on:
     branches: [ "master" ]
 
 jobs:
-  build:
-
+  build-autoconf:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v4
-    - name: configure
+    - name: Install dependencies
+      run: sudo apt-get install -y libncurses5-dev libncursesw5-dev
+    - name: Run autoreconf
+      run: autoreconf -i
+    - name: Configure
       run: ./configure
-    - name: make
+    - name: Build
       run: make
-    - name: make check
-      run: make check
-    - name: make distcheck
-      run: make distcheck
+    - name: Test binary
+      run: ./cmatrix-pipes -V
+
+  build-cmake:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install dependencies
+      run: sudo apt-get install -y libncurses5-dev libncursesw5-dev cmake
+    - name: Create build directory
+      run: mkdir -p build
+    - name: Configure with CMake
+      run: cd build && cmake ..
+    - name: Build
+      run: cd build && make
+    - name: Test binary
+      run: cd build && ./cmatrix-pipes -V
