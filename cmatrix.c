@@ -106,7 +106,9 @@ char *pipe_path = NULL;      /* Path to the named pipe */
 int pipe_fd = -1;            /* File descriptor for the pipe */
 pthread_t pipe_thread;       /* Thread for reading from pipe */
 int use_pipe = 0;            /* Flag for pipe usage */
-pthread_mutex_t pipe_mutex = PTHREAD_MUTEX_INITIALIZER; /* Mutex for shared resources */
+pthread_mutex_t pipe_mutex;  /* Mutex for shared resources (initialized in setup_pipe) */
+volatile int pipe_active = 0;/* Flag indicating if pipe is currently active */
+int matrix_pause = 0;        /* Global pause state, can be controlled via pipe */
 
 int va_system(char *str, ...) {
 
@@ -122,16 +124,24 @@ int va_system(char *str, ...) {
 /* What we do when we're all set to exit */
 /* Clean up pipe resources */
 void cleanup_pipe(void) {
+    /* Set flag to indicate pipe is no longer active */
+    pipe_active = 0;
+    
+    /* Safely close and clean up pipe resources */
     if (pipe_fd >= 0) {
         close(pipe_fd);
         pipe_fd = -1;
     }
     
     if (pipe_path) {
+        /* Remove the pipe file from the filesystem */
         unlink(pipe_path);
         free(pipe_path);
         pipe_path = NULL;
     }
+    
+    /* Clean up mutex */
+    pthread_mutex_destroy(&pipe_mutex);
 }
 
 void finish(void) {
@@ -194,6 +204,7 @@ void c_die(char *msg, ...) {
 extern int mcolor;
 extern int rainbow;
 extern int update;
+extern int bold_global;
 
 /* Process pipe commands */
 void process_pipe_command(char *cmd) {
@@ -254,6 +265,35 @@ void process_pipe_command(char *cmd) {
             update = speed;
         }
     }
+    /* Handle pause command */
+    else if (strcmp(cmd, "pause") == 0) {
+        if (strcmp(value, "on") == 0 || strcmp(value, "1") == 0 || strcmp(value, "true") == 0) {
+            matrix_pause = 1;
+        } else if (strcmp(value, "off") == 0 || strcmp(value, "0") == 0 || strcmp(value, "false") == 0) {
+            matrix_pause = 0;
+        } else {
+            matrix_pause = !matrix_pause; /* Toggle pause if value isn't recognized */
+        }
+    }
+    /* Handle bold command */
+    else if (strcmp(cmd, "bold") == 0) {
+        if (strcmp(value, "off") == 0 || strcmp(value, "0") == 0) {
+            bold_global = 0;
+        } else if (strcmp(value, "on") == 0 || strcmp(value, "1") == 0) {
+            bold_global = 1;
+        } else if (strcmp(value, "all") == 0 || strcmp(value, "2") == 0) {
+            bold_global = 2;
+        }
+    }
+    /* Handle exit command */
+    else if (strcmp(cmd, "exit") == 0) {
+        if (lock != 1 && (strcmp(value, "force") == 0 || strcmp(value, "1") == 0 || strcmp(value, "true") == 0)) {
+            /* Set signal to exit, which will be handled in the main loop */
+            pthread_mutex_unlock(&pipe_mutex);
+            finish();
+            return;
+        }
+    }
     
     pthread_mutex_unlock(&pipe_mutex);
 }
@@ -263,12 +303,18 @@ void *pipe_monitor_thread(void *arg) {
     char buffer[PIPE_BUF_SIZE];
     struct pollfd pfd;
     int ret;
+    int reconnect_attempts = 0;
+    const int max_reconnect_attempts = 5;
+    const int reconnect_delay_ms = 500;
     
     /* Set up polling structure */
     pfd.fd = pipe_fd;
     pfd.events = POLLIN;
     
     while (1) {
+        /* Check for thread cancellation */
+        pthread_testcancel();
+        
         /* Wait for data with a timeout */
         ret = poll(&pfd, 1, 1000); /* 1 second timeout */
         
@@ -276,7 +322,34 @@ void *pipe_monitor_thread(void *arg) {
             /* Error occurred */
             if (errno != EINTR) {
                 perror("poll");
-                break;
+                
+                /* Try to recover from poll error by reopening pipe */
+                if (++reconnect_attempts <= max_reconnect_attempts) {
+                    fprintf(stderr, "Attempting to recover pipe connection (%d/%d)...\n", 
+                            reconnect_attempts, max_reconnect_attempts);
+                    
+                    /* Close and reopen pipe */
+                    if (pipe_fd >= 0) {
+                        close(pipe_fd);
+                    }
+                    
+                    napms(reconnect_delay_ms); /* Short delay before reconnect attempt */
+                    
+                    pipe_fd = open(pipe_path, O_RDONLY | O_NONBLOCK);
+                    if (pipe_fd < 0) {
+                        perror("Failed to reopen pipe during recovery");
+                        continue;
+                    }
+                    
+                    /* Update poll structure with new file descriptor */
+                    pfd.fd = pipe_fd;
+                    fprintf(stderr, "Pipe connection recovered\n");
+                    reconnect_attempts = 0; /* Reset counter on successful reconnect */
+                } else {
+                    fprintf(stderr, "Failed to recover pipe connection after %d attempts\n", 
+                            max_reconnect_attempts);
+                    break;
+                }
             }
         } else if (ret > 0) {
             /* Data is available */
@@ -285,26 +358,59 @@ void *pipe_monitor_thread(void *arg) {
                 if (bytes_read > 0) {
                     buffer[bytes_read] = '\0';
                     process_pipe_command(buffer);
+                    reconnect_attempts = 0; /* Reset counter on successful read */
                 } else if (bytes_read == 0) {
                     /* Pipe closed, reopen it */
+                    fprintf(stderr, "Pipe closed, reopening...\n");
                     close(pipe_fd);
+                    
+                    napms(reconnect_delay_ms); /* Short delay before reconnect attempt */
+                    
                     pipe_fd = open(pipe_path, O_RDONLY | O_NONBLOCK);
                     if (pipe_fd < 0) {
                         perror("Failed to reopen pipe");
-                        break;
+                        if (++reconnect_attempts > max_reconnect_attempts) {
+                            fprintf(stderr, "Maximum reconnect attempts reached\n");
+                            break;
+                        }
+                        continue;
                     }
                     pfd.fd = pipe_fd;
+                    fprintf(stderr, "Pipe reopened successfully\n");
+                    reconnect_attempts = 0; /* Reset counter on successful reconnect */
                 } else {
                     /* Read error */
                     if (errno != EAGAIN && errno != EWOULDBLOCK) {
                         perror("read");
-                        break;
+                        if (++reconnect_attempts > max_reconnect_attempts) {
+                            break;
+                        }
                     }
                 }
+            } else if (pfd.revents & (POLLHUP | POLLERR | POLLNVAL)) {
+                /* Handle pipe errors */
+                fprintf(stderr, "Pipe error detected, attempting to reopen...\n");
+                close(pipe_fd);
+                
+                napms(reconnect_delay_ms); /* Short delay before reconnect attempt */
+                
+                pipe_fd = open(pipe_path, O_RDONLY | O_NONBLOCK);
+                if (pipe_fd < 0) {
+                    perror("Failed to reopen pipe after error");
+                    if (++reconnect_attempts > max_reconnect_attempts) {
+                        fprintf(stderr, "Maximum reconnect attempts reached\n");
+                        break;
+                    }
+                    continue;
+                }
+                pfd.fd = pipe_fd;
+                fprintf(stderr, "Pipe reopened successfully after error\n");
+                reconnect_attempts = 0; /* Reset counter on successful reconnect */
             }
         }
     }
     
+    fprintf(stderr, "Pipe monitoring thread exiting\n");
     return NULL;
 }
 
@@ -324,19 +430,48 @@ int setup_pipe(const char *path) {
         return 0;
     }
     
+    /* Initialize mutex with recursive attribute to allow nested locking */
+    pthread_mutexattr_t attr;
+    pthread_mutexattr_init(&attr);
+    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+    pthread_mutex_init(&pipe_mutex, &attr);
+    pthread_mutexattr_destroy(&attr);
+    
+    /* Set thread attributes for better cleanup */
+    pthread_attr_t thread_attr;
+    pthread_attr_init(&thread_attr);
+    pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_JOINABLE);
+    
     /* Start the monitoring thread */
-    if (pthread_create(&pipe_thread, NULL, pipe_monitor_thread, NULL) != 0) {
+    if (pthread_create(&pipe_thread, &thread_attr, pipe_monitor_thread, NULL) != 0) {
         perror("pthread_create");
+        pthread_attr_destroy(&thread_attr);
+        pthread_mutex_destroy(&pipe_mutex);
         close(pipe_fd);
         unlink(path);
         return 0;
     }
     
+    pthread_attr_destroy(&thread_attr);
+    
     pipe_path = strdup(path);
     fprintf(stderr, "Named pipe created at: %s\n", path);
     fprintf(stderr, "Send commands with: echo \"command=value\" > %s\n", path);
-    fprintf(stderr, "Commands: color=green|red|blue|white|yellow|cyan|magenta|black|rainbow\n");
-    fprintf(stderr, "          speed=0-10\n");
+    fprintf(stderr, "Available commands:\n");
+    fprintf(stderr, "  color=green|red|blue|white|yellow|cyan|magenta|black|rainbow\n");
+    fprintf(stderr, "    - Change the matrix color or enable rainbow mode\n");
+    fprintf(stderr, "  speed=0-10\n");
+    fprintf(stderr, "    - Set the animation speed (0=fastest, 10=slowest)\n");
+    fprintf(stderr, "  pause=on|off|1|0|true|false\n");
+    fprintf(stderr, "    - Pause or resume the animation\n");
+    fprintf(stderr, "  bold=on|off|all|0|1|2\n");
+    fprintf(stderr, "    - Control character boldness (0=off, 1=some, 2=all)\n");
+    fprintf(stderr, "  exit=force|1|true\n");
+    fprintf(stderr, "    - Exit cmatrix (only works if not in lock mode)\n");
+    fprintf(stderr, "Examples:\n");
+    fprintf(stderr, "  echo \"color=red\" > %s\n", path);
+    fprintf(stderr, "  echo \"speed=3\" > %s\n", path);
+    fprintf(stderr, "  echo \"pause=on\" > %s\n", path);
     
     return 1;
 }
@@ -510,6 +645,7 @@ void resize_screen(void) {
 int update = 4;
 int mcolor = COLOR_GREEN;
 int rainbow = 0;
+int bold_global = 0; /* Bold setting accessible globally */
 
 int main(int argc, char *argv[]) {
     int i, y, z, optchr, keypress;
@@ -517,7 +653,6 @@ int main(int argc, char *argv[]) {
     int count = 0;
     int screensaver = 0;
     int asynch = 0;
-    int bold = 0;
     int force = 0;
     int firstcoldone = 0;
     int oldstyle = 0;
@@ -526,7 +661,6 @@ int main(int argc, char *argv[]) {
     int lambda = 0;
     int randnum = 0;
     int randmin = 0;
-    int pause = 0;
     int classic = 0;
     int changes = 0;
     char *msg = "";
@@ -546,12 +680,12 @@ int main(int argc, char *argv[]) {
             asynch = 1;
             break;
         case 'b':
-            if (bold != 2) {
-                bold = 1;
+            if (bold_global != 2) {
+                bold_global = 1;
             }
             break;
         case 'B':
-            bold = 2;
+            bold_global = 2;
             break;
         case 'C':
             if (!strcasecmp(optarg, "green")) {
@@ -596,7 +730,7 @@ int main(int argc, char *argv[]) {
             msg = strdup(optarg);
             break;
         case 'n':
-            bold = -1;
+            bold_global = -1;
             break;
         case 'h':
         case '?':
@@ -796,16 +930,16 @@ if (console) {
                     asynch = 1 - asynch;
                     break;
                 case 'b':
-                    bold = 1;
+                    bold_global = 1;
                     break;
                 case 'B':
-                    bold = 2;
+                    bold_global = 2;
                     break;
                 case 'L':
                     lock = 1;
                     break;
                 case 'n':
-                    bold = 0;
+                    bold_global = 0;
                     break;
                 case '0': /* Fall through */
                 case '1': /* Fall through */
@@ -855,14 +989,14 @@ if (console) {
                     break;
                 case 'p':
                 case 'P':
-                    pause = (pause == 0)?1:0;
+                    matrix_pause = (matrix_pause == 0)?1:0;
                     break;
 
                 }
             }
         }
         for (j = 0; j <= COLS - 1; j += 2) {
-            if ((count > updates[j] || asynch == 0) && pause == 0) {
+            if ((count > updates[j] || asynch == 0) && matrix_pause == 0) {
 
                 /* I don't like old-style scrolling, yuck */
                 if (oldstyle) {
@@ -974,7 +1108,7 @@ if (console) {
                         attron(A_ALTCHARSET);
                     }
                     attron(COLOR_PAIR(COLOR_WHITE));
-                    if (bold) {
+                    if (bold_global) {
                         attron(A_BOLD);
                     }
                     if (matrix[i][j].val == 0) {
@@ -990,7 +1124,7 @@ if (console) {
                     }
 
                     attroff(COLOR_PAIR(COLOR_WHITE));
-                    if (bold) {
+                    if (bold_global) {
                         attroff(A_BOLD);
                     }
                     if (console || xwindow) {
@@ -1023,19 +1157,19 @@ if (console) {
                     }
                     attron(COLOR_PAIR(mcolor));
                     if (matrix[i][j].val == 1) {
-                        if (bold) {
+                        if (bold_global) {
                             attron(A_BOLD);
                         }
                         addch('|');
-                        if (bold) {
+                        if (bold_global) {
                             attroff(A_BOLD);
                         }
                     } else {
                         if (console || xwindow) {
                             attron(A_ALTCHARSET);
                         }
-                        if (bold == 2 ||
-                            (bold == 1 && matrix[i][j].val % 2 == 0)) {
+                        if (bold_global == 2 ||
+                            (bold_global == 1 && matrix[i][j].val % 2 == 0)) {
                             attron(A_BOLD);
                         }
                         if (matrix[i][j].val == -1) {
@@ -1062,8 +1196,8 @@ if (console) {
                             }
                             #endif
                         }
-                        if (bold == 2 ||
-                            (bold == 1 && matrix[i][j].val % 2 == 0)) {
+                        if (bold_global == 2 ||
+                            (bold_global == 1 && matrix[i][j].val % 2 == 0)) {
                             attroff(A_BOLD);
                         }
                         if (console || xwindow) {
