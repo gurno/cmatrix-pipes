@@ -173,10 +173,14 @@ CMatrix-Pipes is a fork of [CMatrix](https://github.com/abishekvashok/cmatrix), 
 ![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
 ## :book: Contribution Guide
-If you have any suggestions/flames/patches to send, please feel free to:
-- Open issues and if possible label them, so that it is easy to categorise features, bugs etc.
-- If you solved some problems or made some valuable changes, Please open a Pull Request on Github.
-- See [contributing.md](./CONTRIBUTING.md) for more details.
+CMatrix-Pipes is focused specifically on the named pipe control feature. When contributing, please keep in mind:
+
+- **Named Pipe Features**: Contributions related to the named pipe control interface and its functionality are welcome here.
+- **Core CMatrix Features**: For bug fixes, improvements, or features related to the core CMatrix functionality (not related to pipes), please submit them to the [original CMatrix project](https://github.com/abishekvashok/cmatrix) instead.
+- **Issue Labeling**: When opening issues, please label them appropriately to indicate whether they are pipe-related or core features.
+- **Pull Requests**: For pipe-related improvements, please open a PR with detailed descriptions of what you've changed and why.
+
+For additional contribution guidelines, see [contributing.md](./CONTRIBUTING.md).
 
 ![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
