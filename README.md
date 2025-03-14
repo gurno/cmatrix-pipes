@@ -1,22 +1,16 @@
-<h1 align="center">CMatrix</h1>
+<h1 align="center">CMatrix-Pipes</h1>
 
-<h3 align="center"> Matrix like effect in your terminal </h3>
+<h3 align="center"> Matrix like effect in your terminal with named pipe control </h3>
 
-</p>
 <p align="center">
-  <a href="https://travis-ci.org/abishekvashok/cmatrix">
-    <img src="https://travis-ci.org/abishekvashok/cmatrix.svg?branch=master">
-  </a>
+  <strong>Fork of <a href="https://github.com/abishekvashok/cmatrix">CMatrix</a> with named pipe control features</strong>
+</p>
+
+<p align="center">
   <a href="./COPYING">
-    <img src="https://img.shields.io/github/license/abishekvashok/cmatrix?color=blue">
+    <img src="https://img.shields.io/github/license/gurno/cmatrix-pipes?color=blue">
   </a>
   <img src="https://img.shields.io/badge/contributions-welcome-orange">
-  <a href="https://github.com/abishekvashok/cmatrix/stargazers">
-    <img src="https://img.shields.io/github/stars/abishekvashok/cmatrix">
-  </a>
-  <a href="https://github.com/abishekvashok/cmatrix/network">
-    <img src="https://img.shields.io/github/forks/abishekvashok/cmatrix">
-  </a>
 </p>
 
 
@@ -25,7 +19,7 @@
 ## Contents
 - [Overview](#overview)
 - [Build Dependencies](#build-dependencies)
-- [Building and Installation](#building-and-installing-cmatrix)
+- [Building and Installation](#building-and-installing-cmatrix-pipes)
     - [Using configure (recommended)](#using-configure-(recommended-for-most-linux%2Fmingw-users))
     - [Using CMake](#using-cmake)
 - [Usage](#usage)
@@ -33,8 +27,8 @@
 - [Captures](#captures)
     - [Screenshots](#screenshots)
     - [Screencasts](#screencasts)
-- [Maintainer](#maintainers)
-    - [Contributors](#our-contributors)
+- [Original Project](#original-project)
+- [Contributors](#our-contributors)
 - [Contribution Guide](#contribution-guide)
 - [License](#license)
 
@@ -42,12 +36,11 @@
 
 ## :cloud: Overview
 
-CMatrix is based on the screensaver from The Matrix website. It shows text
-flying in and out in a terminal like as seen in "The Matrix" movie. It can
-scroll lines all at the same rate or asynchronously and at a user-defined
-speed.
+CMatrix-Pipes is a fork of the original [CMatrix](https://github.com/abishekvashok/cmatrix) with added support for runtime control through named pipes. Like the original, it shows text flying in and out in a terminal as seen in "The Matrix" movie, but with the additional ability to change colors and speed while running through a named pipe interface.
 
-CMAtrix is inspired from 'The Matrix' movie. If you haven’t seen this movie and you are a fan of computers or sci-fi in general, go see this movie!!!
+The original CMatrix is based on the screensaver from The Matrix website. It can scroll lines all at the same rate or asynchronously and at a user-defined speed.
+
+CMatrix-Pipes maintains all the features of the original while adding new runtime control capabilities.
 
 > :grey_exclamation:`Disclaimer` : We are in no way affiliated in any way with the movie "The Matrix", "Warner Bros" nor
 any of its affiliates in any way, just fans.
@@ -55,7 +48,7 @@ any of its affiliates in any way, just fans.
 ![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
 ## :open_file_folder: Build Dependencies
-You'll need the following libraries to build cmatrix:
+You'll need the following libraries to build cmatrix-pipes:
 
 1. **ncurses library** - For terminal manipulation. On Windows, using mingw-w64-ncurses is recommended (PDCurses will also work, but it does not support colors or bold text).
 
@@ -81,8 +74,8 @@ sudo dnf install glibc-devel
 
 ![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
-## :floppy_disk: Building and installing cmatrix
-To install cmatrix, Clone this repo in your local system and use either of the following methods from within the cmatrix directory.
+## :floppy_disk: Building and installing CMatrix-Pipes
+To install cmatrix-pipes, clone this repo in your local system and use either of the following methods from within the cmatrix-pipes directory.
 
 #### :small_blue_diamond: Using `configure` (recommended for most linux/mingw users)
 ```sh
@@ -111,7 +104,7 @@ make install
 
 ## :bookmark_tabs: Usage
 
-After you have installed **cmatrix** just type the command `cmatrix` to run it :)
+After you have installed **cmatrix-pipes** just type the command `cmatrix` to run it :)
 ```sh
 cmatrix
 ```
@@ -131,7 +124,7 @@ _To get the program to look most like the Win/Mac screensaver, use `cmatrix -ol`
 
 ### Named Pipe Control
 
-CMatrix supports runtime control through a named pipe with the `-P` option:
+CMatrix-Pipes supports runtime control through a named pipe with the `-P` option:
 
 ```sh
 cmatrix -P /tmp/cmatrix_pipe
@@ -152,7 +145,7 @@ echo "speed=2" > /tmp/cmatrix_pipe
 
 Available color options: green, red, blue, white, yellow, cyan, magenta, black, rainbow
 
-> :round_pushpin: _Note: cmatrix is probably not particularly portable or efficient, but it won't hog
+> :round_pushpin: _Note: cmatrix-pipes is probably not particularly portable or efficient, but it won't hog
 **too** much CPU time._
 
 ![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
@@ -175,26 +168,18 @@ Available color options: green, red, blue, white, yellow, cyan, magenta, black, 
 
 ![-----------------------------------------------------](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
 
-## :zap: Maintainers
-- ➤ **Abishek V Ashok** [Core] - <abishekvashok@gmail.com><br> 
-<p align="center">
-  <a href="https://twitter.com/abishekvashok">
-    <img src="https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white">
-  </a>
-  <a href="https://github.com/abishekvashok">
-    <img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white">
-  </a>
-</p>
-
+## :link: Original Project
+CMatrix-Pipes is a fork of [CMatrix](https://github.com/abishekvashok/cmatrix), originally created by **Chris Allegretta** and maintained by **Abishek V Ashok**. All credit for the original CMatrix goes to them and the many contributors to that project.
 
 ## :busts_in_silhouette: Our Contributors
 #### :small_orange_diamond: Thanks to
 - ➤ **Chris Allegretta** <chrisa@asty.org> for writing cmatrix up in a fortnight and giving us
   the responsibility to further improve it.
+- ➤ **Abishek V Ashok** [Core] - <abishekvashok@gmail.com> for maintaining the original CMatrix project.
 - ➤ **Krisjon Hanson** and **Bjoern Ganslandt** for helping with bold support and
   Bjoern again for the cursor removal code, helping with the `-u` and `-l`
   modes/flags, and Makefile improvements.
-- ➤ **Adam Gurno** for multi-color support.
+- ➤ **Adam Gurno** for multi-color support and implementing the named pipe control feature in this fork.
 - ➤ **Garrick West** for debian consolefont dir support.
 - ➤ **Nemo** for design thoughts and continuous help and support.
 - ➤ **John Donahue** for helping with transparent term support
@@ -220,4 +205,3 @@ If you have any suggestions/flames/patches to send, please feel free to:
 
 ## :page_facing_up: License
 This software is provided under the GNU GPL v3. [View License](./COPYING)
-
