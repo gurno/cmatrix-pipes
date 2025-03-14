@@ -10,14 +10,16 @@ CMatrix-Pipes is a fork of the original [CMatrix](https://github.com/abishekvash
 
 ## Pull Request Process
 
-1. Ensure any install or build dependencies are removed before the end of the layer when doing a
-   build.
-2. Update the README.md with details of changes to the interface, this includes new environment
-   variables, exposed ports, useful file locations and container parameters.
-3. Increase the version numbers in any examples files and the README.md to the new version that this
-   Pull Request would represent. The versioning scheme we use is [SemVer](http://semver.org/).
-4. You may merge the Pull Request in once you have the sign-off of two other developers, or if you
-   do not have permission to do that, you may request the second reviewer to merge it for you.
+Everyone is welcome to submit Pull Requests to this project! CMatrix-Pipes is currently maintained by a single developer who will review and process PRs as soon as possible.
+
+When submitting a PR, please:
+
+1. Ensure any install or build dependencies are removed before the end of the layer when doing a build.
+2. If your PR affects the interface or functionality, update the README.md with appropriate details.
+3. Make sure your code follows the existing style and conventions of the project.
+4. For significant changes, consider opening an issue first to discuss the approach.
+
+The maintainer will review your PR as soon as possible and work with you on any necessary adjustments before merging.
 
 ## Code of Conduct
 
