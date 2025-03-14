@@ -179,7 +179,6 @@ CMatrix-Pipes is a fork of [CMatrix](https://github.com/abishekvashok/cmatrix), 
 - ➤ **Krisjon Hanson** and **Bjoern Ganslandt** for helping with bold support and
   Bjoern again for the cursor removal code, helping with the `-u` and `-l`
   modes/flags, and Makefile improvements.
-- ➤ **Adam Gurno** for multi-color support and implementing the named pipe control feature in this fork.
 - ➤ **Garrick West** for debian consolefont dir support.
 - ➤ **Nemo** for design thoughts and continuous help and support.
 - ➤ **John Donahue** for helping with transparent term support
