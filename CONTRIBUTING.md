@@ -8,11 +8,6 @@ CMatrix-Pipes is a fork of the original [CMatrix](https://github.com/abishekvash
 - **Core CMatrix Features**: For bug fixes, improvements, or features related to the core CMatrix functionality (not related to pipes), please submit them to the [original CMatrix project](https://github.com/abishekvashok/cmatrix) instead.
 - **Merging Changes**: We regularly merge changes from the upstream CMatrix project to keep the codebase up to date.
 
-When contributing to this repository, please first discuss the change you wish to make via issue,
-email, or any other method with the owners of this repository before making a change.
-
-Please note we have a code of conduct, please follow it in all your interactions with the project.
-
 ## Pull Request Process
 
 1. Ensure any install or build dependencies are removed before the end of the layer when doing a
