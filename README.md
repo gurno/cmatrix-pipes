@@ -10,6 +10,12 @@
   <a href="./COPYING">
     <img src="https://img.shields.io/github/license/gurno/cmatrix-pipes?color=blue">
   </a>
+  <a href="https://github.com/gurno/cmatrix-pipes/actions/workflows/c-cpp.yml">
+    <img src="https://github.com/gurno/cmatrix-pipes/actions/workflows/c-cpp.yml/badge.svg" alt="C/C++ CI">
+  </a>
+  <a href="https://github.com/gurno/cmatrix-pipes/actions/workflows/makefile.yml">
+    <img src="https://github.com/gurno/cmatrix-pipes/actions/workflows/makefile.yml/badge.svg" alt="Makefile CI">
+  </a>
   <img src="https://img.shields.io/badge/contributions-welcome-orange">
 </p>
 
