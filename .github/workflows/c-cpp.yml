@@ -2,9 +2,9 @@ name: C/C++ CI
 
 on:
   push:
-    branches: [ "merged-pipes" ]
+    branches: [ "master" ]
   pull_request:
-    branches: [ "merged-pipes" ]
+    branches: [ "master" ]
 
 jobs:
   build:
