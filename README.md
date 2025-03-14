@@ -16,6 +16,9 @@
   <a href="https://github.com/gurno/cmatrix-pipes/actions/workflows/makefile.yml">
     <img src="https://github.com/gurno/cmatrix-pipes/actions/workflows/makefile.yml/badge.svg" alt="Makefile CI">
   </a>
+  <a href="https://github.com/gurno/cmatrix-pipes/actions/workflows/codeql.yml">
+    <img src="https://github.com/gurno/cmatrix-pipes/actions/workflows/codeql.yml/badge.svg" alt="CodeQL Advanced">
+  </a>
   <img src="https://img.shields.io/badge/contributions-welcome-orange">
 </p>
 
