@@ -108,7 +108,7 @@ pthread_t pipe_thread;       /* Thread for reading from pipe */
 int use_pipe = 0;            /* Flag for pipe usage */
 pthread_mutex_t pipe_mutex;  /* Mutex for shared resources (initialized in setup_pipe) */
 volatile int pipe_active = 0;/* Flag indicating if pipe is currently active */
-int pause = 0;               /* Global pause state, can be controlled via pipe */
+int matrix_pause = 0;        /* Global pause state, can be controlled via pipe */
 
 int va_system(char *str, ...) {
 
@@ -204,6 +204,7 @@ void c_die(char *msg, ...) {
 extern int mcolor;
 extern int rainbow;
 extern int update;
+extern int bold_global;
 
 /* Process pipe commands */
 void process_pipe_command(char *cmd) {
@@ -267,21 +268,21 @@ void process_pipe_command(char *cmd) {
     /* Handle pause command */
     else if (strcmp(cmd, "pause") == 0) {
         if (strcmp(value, "on") == 0 || strcmp(value, "1") == 0 || strcmp(value, "true") == 0) {
-            pause = 1;
+            matrix_pause = 1;
         } else if (strcmp(value, "off") == 0 || strcmp(value, "0") == 0 || strcmp(value, "false") == 0) {
-            pause = 0;
+            matrix_pause = 0;
         } else {
-            pause = !pause; /* Toggle pause if value isn't recognized */
+            matrix_pause = !matrix_pause; /* Toggle pause if value isn't recognized */
         }
     }
     /* Handle bold command */
     else if (strcmp(cmd, "bold") == 0) {
         if (strcmp(value, "off") == 0 || strcmp(value, "0") == 0) {
-            bold = 0;
+            bold_global = 0;
         } else if (strcmp(value, "on") == 0 || strcmp(value, "1") == 0) {
-            bold = 1;
+            bold_global = 1;
         } else if (strcmp(value, "all") == 0 || strcmp(value, "2") == 0) {
-            bold = 2;
+            bold_global = 2;
         }
     }
     /* Handle exit command */
@@ -644,6 +645,7 @@ void resize_screen(void) {
 int update = 4;
 int mcolor = COLOR_GREEN;
 int rainbow = 0;
+int bold_global = 0; /* Bold setting accessible globally */
 
 int main(int argc, char *argv[]) {
     int i, y, z, optchr, keypress;
@@ -651,7 +653,6 @@ int main(int argc, char *argv[]) {
     int count = 0;
     int screensaver = 0;
     int asynch = 0;
-    int bold = 0;
     int force = 0;
     int firstcoldone = 0;
     int oldstyle = 0;
@@ -660,7 +661,6 @@ int main(int argc, char *argv[]) {
     int lambda = 0;
     int randnum = 0;
     int randmin = 0;
-    int pause = 0;
     int classic = 0;
     int changes = 0;
     char *msg = "";
@@ -680,12 +680,12 @@ int main(int argc, char *argv[]) {
             asynch = 1;
             break;
         case 'b':
-            if (bold != 2) {
-                bold = 1;
+            if (bold_global != 2) {
+                bold_global = 1;
             }
             break;
         case 'B':
-            bold = 2;
+            bold_global = 2;
             break;
         case 'C':
             if (!strcasecmp(optarg, "green")) {
@@ -730,7 +730,7 @@ int main(int argc, char *argv[]) {
             msg = strdup(optarg);
             break;
         case 'n':
-            bold = -1;
+            bold_global = -1;
             break;
         case 'h':
         case '?':
@@ -930,16 +930,16 @@ if (console) {
                     asynch = 1 - asynch;
                     break;
                 case 'b':
-                    bold = 1;
+                    bold_global = 1;
                     break;
                 case 'B':
-                    bold = 2;
+                    bold_global = 2;
                     break;
                 case 'L':
                     lock = 1;
                     break;
                 case 'n':
-                    bold = 0;
+                    bold_global = 0;
                     break;
                 case '0': /* Fall through */
                 case '1': /* Fall through */
@@ -989,14 +989,14 @@ if (console) {
                     break;
                 case 'p':
                 case 'P':
-                    pause = (pause == 0)?1:0;
+                    matrix_pause = (matrix_pause == 0)?1:0;
                     break;
 
                 }
             }
         }
         for (j = 0; j <= COLS - 1; j += 2) {
-            if ((count > updates[j] || asynch == 0) && pause == 0) {
+            if ((count > updates[j] || asynch == 0) && matrix_pause == 0) {
 
                 /* I don't like old-style scrolling, yuck */
                 if (oldstyle) {
@@ -1108,7 +1108,7 @@ if (console) {
                         attron(A_ALTCHARSET);
                     }
                     attron(COLOR_PAIR(COLOR_WHITE));
-                    if (bold) {
+                    if (bold_global) {
                         attron(A_BOLD);
                     }
                     if (matrix[i][j].val == 0) {
@@ -1124,7 +1124,7 @@ if (console) {
                     }
 
                     attroff(COLOR_PAIR(COLOR_WHITE));
-                    if (bold) {
+                    if (bold_global) {
                         attroff(A_BOLD);
                     }
                     if (console || xwindow) {
@@ -1157,19 +1157,19 @@ if (console) {
                     }
                     attron(COLOR_PAIR(mcolor));
                     if (matrix[i][j].val == 1) {
-                        if (bold) {
+                        if (bold_global) {
                             attron(A_BOLD);
                         }
                         addch('|');
-                        if (bold) {
+                        if (bold_global) {
                             attroff(A_BOLD);
                         }
                     } else {
                         if (console || xwindow) {
                             attron(A_ALTCHARSET);
                         }
-                        if (bold == 2 ||
-                            (bold == 1 && matrix[i][j].val % 2 == 0)) {
+                        if (bold_global == 2 ||
+                            (bold_global == 1 && matrix[i][j].val % 2 == 0)) {
                             attron(A_BOLD);
                         }
                         if (matrix[i][j].val == -1) {
@@ -1196,8 +1196,8 @@ if (console) {
                             }
                             #endif
                         }
-                        if (bold == 2 ||
-                            (bold == 1 && matrix[i][j].val % 2 == 0)) {
+                        if (bold_global == 2 ||
+                            (bold_global == 1 && matrix[i][j].val % 2 == 0)) {
                             attroff(A_BOLD);
                         }
                         if (console || xwindow) {
