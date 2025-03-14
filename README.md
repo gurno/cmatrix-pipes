@@ -15,12 +15,12 @@
         </a><br>
         <a href="https://github.com/gurno/cmatrix-pipes/actions/workflows/makefile.yml">
           <img src="https://github.com/gurno/cmatrix-pipes/actions/workflows/makefile.yml/badge.svg" alt="Makefile CI">
+        </a><br>
+        <a href="https://github.com/gurno/cmatrix-pipes/actions/workflows/codeql.yml">
+          <img src="https://github.com/gurno/cmatrix-pipes/actions/workflows/codeql.yml/badge.svg" alt="CodeQL Advanced">
         </a>
       </td>
       <td align="center">
-        <a href="https://github.com/gurno/cmatrix-pipes/actions/workflows/codeql.yml">
-          <img src="https://github.com/gurno/cmatrix-pipes/actions/workflows/codeql.yml/badge.svg" alt="CodeQL Advanced">
-        </a><br>
         <a href="./COPYING">
           <img src="https://img.shields.io/github/license/gurno/cmatrix-pipes?color=blue" alt="License">
         </a><br>
