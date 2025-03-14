@@ -104,30 +104,30 @@ make install
 
 ## :bookmark_tabs: Usage
 
-After you have installed **cmatrix-pipes** just type the command `cmatrix` to run it :)
+After you have installed **cmatrix-pipes** just type the command `cmatrix-pipes` to run it :)
 ```sh
-cmatrix
+cmatrix-pipes
 ```
 Run with different arguments to get different effects.
 ```sh
-cmatrix [-abBflohnsmVx] [-u update] [-C color] [-P pipe_path]
+cmatrix-pipes [-abBflohnsmVx] [-u update] [-C color] [-P pipe_path]
 ```
 Example:
 ```sh
-cmatrix -ba -u 2 -C red
+cmatrix-pipes -ba -u 2 -C red
 ```
 
-For more options and **help** run `cmatrix -h` <br>OR<br> Read Manual Page by running command `man cmatrix`
+For more options and **help** run `cmatrix-pipes -h` <br>OR<br> Read Manual Page by running command `man cmatrix`
 
-_To get the program to look most like the movie, use `cmatrix -lba`_
-_To get the program to look most like the Win/Mac screensaver, use `cmatrix -ol`_
+_To get the program to look most like the movie, use `cmatrix-pipes -lba`_
+_To get the program to look most like the Win/Mac screensaver, use `cmatrix-pipes -ol`_
 
 ### Named Pipe Control
 
 CMatrix-Pipes supports runtime control through a named pipe with the `-P` option:
 
 ```sh
-cmatrix -P /tmp/cmatrix_pipe
+cmatrix-pipes -P /tmp/cmatrix_pipe
 ```
 
 This creates a named pipe at the specified path. You can control the animation while it's running by sending commands to this pipe from another terminal or script:

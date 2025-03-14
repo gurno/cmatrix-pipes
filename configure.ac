@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([cmatrix], [2.0], [abishekvashok@gmail.com])
+AC_INIT([cmatrix-pipes], [2.0], [abishekvashok@gmail.com])
 AC_CONFIG_SRCDIR([cmatrix.c])
 AM_CONFIG_HEADER(config.h)
 AM_INIT_AUTOMAKE
@@ -87,9 +87,9 @@ if test x$native_windows != xno; then
   CFLAGS="$CFLAGS -static"
 fi
 
-dnl cmatrix terminal font disable option (default enabled)
+dnl cmatrix-pipes terminal font disable option (default enabled)
 AC_ARG_WITH([fonts],
-	AS_HELP_STRING([--without-fonts], [Install cmatrix without cmatrix font]),
+	AS_HELP_STRING([--without-fonts], [Install cmatrix-pipes without matrix font]),
 	AS_IF([test "x$with_fonts" == "xno"], [enable_fonts=false], [enable_fonts=true]),
 	[enable_fonts=true])
 

@@ -40,7 +40,7 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root)
 %doc COPYING INSTALL README.md
-%{_bindir}/cmatrix
+%{_bindir}/cmatrix-pipes
 %{_mandir}/*/*
 /usr/lib/kbd/consolefonts/matrix.psf.gz
 /usr/lib/kbd/consolefonts/matrix.fnt

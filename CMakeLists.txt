@@ -1,8 +1,8 @@
-# CMake build system for CMatrix
+# CMake build system for CMatrix-Pipes
 
 cmake_minimum_required(VERSION 2.8)
 
-project(CMatrix LANGUAGES C)
+project(CMatrix-Pipes LANGUAGES C)
 set(VERSION "2.0")
 
 include(GNUInstallDirs)
@@ -64,12 +64,12 @@ if (HAVE_USE_DEFAULT_COLORS)
     add_definitions(-DHAVE_USE_DEFAULT_COLORS)
 endif()
 
-add_executable(cmatrix cmatrix.c)
+add_executable(cmatrix-pipes cmatrix.c)
 
 find_package(Threads REQUIRED)
-target_link_libraries(cmatrix ${CURSES_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(cmatrix-pipes ${CURSES_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
-install(TARGETS cmatrix DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS cmatrix-pipes DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES cmatrix.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
 if     (UNIX)
@@ -93,7 +93,7 @@ if     (UNIX)
 			install(CODE
 				"execute_process(COMMAND \"${MKFONTDIR}\" \"${CMAKE_INSTALL_PREFIX}/${X_FONTS_DIR}\")")
 			install(CODE
-				"message(STATUS \"If this is the first time you have installed CMatrix you will probably have to restart X window in order to use the mtx.pcf font.\")")
+				"message(STATUS \"If this is the first time you have installed CMatrix-Pipes you will probably have to restart X window in order to use the mtx.pcf font.\")")
 		endif  ()
 	endforeach ()
 endif  ()
