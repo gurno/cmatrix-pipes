@@ -288,10 +288,18 @@ void process_pipe_command(char *cmd) {
     /* Handle exit command */
     else if (strcmp(cmd, "exit") == 0) {
         if (lock != 1 && (strcmp(value, "force") == 0 || strcmp(value, "1") == 0 || strcmp(value, "true") == 0)) {
-            /* Set signal to exit, which will be handled in the main loop */
+            /* Signal the main loop to exit. Calling finish() directly from the
+             * pipe thread would deadlock when joining itself. */
+#ifndef _WIN32
+            signal_status = SIGINT;
+            pthread_mutex_unlock(&pipe_mutex);
+            return;
+#else
+            /* On Windows, just terminate. */
             pthread_mutex_unlock(&pipe_mutex);
             finish();
             return;
+#endif
         }
     }
     
